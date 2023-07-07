@@ -1,0 +1,56 @@
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <SPIFFS.h>
+
+/* 1. Define the WiFi credentials */
+#define WIFI_SSID "HAMDEE@TOT_2.4G"
+#define WIFI_PASSWORD "0989181002"
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
+  // Initialize the SPIFFS file system
+  if (!SPIFFS.begin(true)) {
+    Serial.println("Failed to mount SPIFFS");
+    return;
+  }
+
+  // Perform the firmware file download
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin("https://firebasestorage.googleapis.com/v0/b/esp-32-2071f.appspot.com/o/test%2Ffirmware.bin?alt=media&token=d5659d72-c8cc-403d-9026-50c78c45f3a9");
+    int httpCode = http.GET();
+
+    if (httpCode == HTTP_CODE_OK) {
+      Serial.println("Starting firmware file download...");
+
+      // Open a file to save the downloaded firmware
+      File file = SPIFFS.open("/downloaded_firmware.bin", FILE_WRITE);
+
+      // Stream the downloaded data to the file
+      WiFiClient *stream = http.getStreamPtr();
+      while (stream->available()) {
+        file.write(stream->read());
+      }
+
+      // Close the file
+      file.close();
+      Serial.println("Firmware file downloaded successfully");
+    } else {
+      Serial.printf("Failed to download firmware file, error code: %d\n", httpCode);
+    }
+
+    http.end();
+  }
+}
+
+void loop() {
+  // Code in the loop is not necessary for the firmware download process
+Serial.println("Hello World");
+}

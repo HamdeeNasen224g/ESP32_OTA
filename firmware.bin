@@ -1,0 +1,30 @@
+// Generate a dummy firmware binary for testing
+#include <Arduino.h>
+
+void setup() {
+  Serial.begin(115200);
+  delay(2000); // Wait for serial connection
+
+  Serial.println("Generating firmware binary...");
+
+  // Create a dummy firmware binary
+  const uint8_t firmware[] = {0x11, 0x22, 0x33, 0x44, 0x55};
+  const size_t firmwareSize = sizeof(firmware);
+
+  // Print the firmware binary as hexadecimal
+  for (size_t i = 0; i < firmwareSize; i++) {
+    Serial.print("0x");
+    if (firmware[i] < 0x10) {
+      Serial.print("0");
+    }
+    Serial.print(firmware[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  Serial.println("Firmware binary generation complete");
+}
+
+void loop() {
+  // Empty loop
+}

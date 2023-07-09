@@ -1,0 +1,82 @@
+#include <WiFi.h>
+#include <ESPmDNS.h>
+#include <WiFiUdp.h>
+#include <ArduinoOTA.h>
+
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+
+  ArduinoOTA.setHostname("esp32-ota");
+  ArduinoOTA.begin();
+  Serial.println("OTA update ready");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  // Check for firmware updates
+  checkForUpdates();
+
+  // Print "Hello, World!" message
+  Serial.println("Hello, World!");
+}
+
+void loop() {
+  ArduinoOTA.handle();
+  // Your code here
+}
+
+void checkForUpdates() {
+  // Fetch the version control file from GitHub
+  WiFiClient client;
+  if (client.connect("raw.githubusercontent.com", 80)) {
+    client.print(String("GET /HamdeeNasen224g/ESP32_OTA/main/version.json") + " HTTP/1.1\r\n" +
+                 "Host: raw.githubusercontent.com\r\n" +
+                 "User-Agent: ESP32\r\n" +
+                 "Connection: close\r\n\r\n");
+  
+    while (client.connected()) {
+      if (client.available()) {
+        String line = client.readStringUntil('\n');
+        if (line == "\r") {
+          // Start of JSON payload
+          break;
+        }
+      }
+    }
+  
+    // Parse the version information
+    DynamicJsonDocument jsonDoc(256);
+    DeserializationError error = deserializeJson(jsonDoc, client);
+    if (error) {
+      Serial.println("Failed to parse version JSON");
+      return;
+    }
+  
+    const char* latestVersion = jsonDoc["version"];
+    const char* currentVersion = "v0.0.1";  // Your current version
+  
+    Serial.print("Latest version: ");
+    Serial.println(latestVersion);
+    Serial.print("Current version: ");
+    Serial.println(currentVersion);
+  
+    // Compare versions
+    if (strcmp(latestVersion, currentVersion) != 0) {
+      // Perform OTA update
+      Serial.println("Performing OTA update...");
+      // Add your OTA update logic here
+    } else {
+      Serial.println("No update available");
+    }
+  } else {
+    Serial.println("Failed to connect to GitHub");
+  }
+}

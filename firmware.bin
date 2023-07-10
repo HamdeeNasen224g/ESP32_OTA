@@ -77,7 +77,7 @@ Serial.println(SPIFFS.usedBytes());
     });
 
    // Download firmware.bin from GitHub
-  downloadFirmware();
+ // downloadFirmware();
 
   // Start OTA server
   ArduinoOTA.begin();
@@ -125,7 +125,7 @@ void downloadFirmware() {
 
 
 void loop() {
-  ArduinoOTA.handle();
+  //ArduinoOTA.handle();
   LEDlight();
     Serial.println("updated");
 }

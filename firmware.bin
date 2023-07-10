@@ -7,7 +7,7 @@
 
 const char* ssid = "HAMDEE@TOT_2.4G";
 const char* password = "0989181002";
-const char* repoUrl = "https://github.com/{owner}/{repo}/raw/{branch}/{path}/firmware.bin";
+const char* repoUrl = "https://github.com/HamdeeNasen224g/ESP32_OTA/raw/main/firmware.bin";
 
 // Set the LED pin number
 const int ledPin = 2; // Assuming the blue LED is connected to GPIO pin 2

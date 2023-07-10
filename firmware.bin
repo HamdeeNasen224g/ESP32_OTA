@@ -9,4 +9,5 @@ void loop() {
   delay(1000);                  // Wait for 1 second
   digitalWrite(LED_PIN, LOW);   // Turn off the LED
   delay(1000);                  // Wait for 1 second
+ Serial.println("Rebooting to apply firmware update");
 }

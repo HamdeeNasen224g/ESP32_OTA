@@ -1,0 +1,13 @@
+const int LED_PIN = 2;  // Replace with the appropriate pin number for your board
+
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED_PIN, HIGH);  // Turn on the LED
+  delay(1000);                  // Wait for 1 second
+  digitalWrite(LED_PIN, LOW);   // Turn off the LED
+  delay(1000);                  // Wait for 1 second
+ Serial.println("Rebooting to apply firmware update");
+}

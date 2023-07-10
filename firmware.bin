@@ -17,7 +17,17 @@ void setup() {
   
    // Set the LED pin as an output
   pinMode(ledPin, OUTPUT);
-  
+
+if (!SPIFFS.begin()) {
+  Serial.println("Failed to mount SPIFFS");
+  return;
+}
+
+  Serial.print("Total SPIFFS space: ");
+Serial.println(SPIFFS.totalBytes());
+Serial.print("Used SPIFFS space: ");
+Serial.println(SPIFFS.usedBytes());
+
   Serial.println("Booting");
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -89,27 +99,35 @@ void downloadFirmware() {
     File file = SPIFFS.open("/firmware.bin", FILE_WRITE);
     if (!file) {
       Serial.println("Failed to create file");
+      http.end();
       return;
     }
 
     // Write the downloaded data to the file
+    int written = 0;
+    uint8_t buf[128];
     while (stream->available()) {
-      file.write(stream->read());
+      size_t len = stream->readBytes(buf, sizeof(buf));
+      file.write(buf, len);
+      written += len;
+      Serial.printf("Download progress: %d bytes\n", written);
     }
-
+    Serial.println("Download complete");
+    
     // Close the file
     file.close();
-    Serial.println("Firmware downloaded successfully");
   } else {
-    Serial.println("Firmware download failed");
+    Serial.printf("Firmware download failed. HTTP status code: %d\n", httpCode);
   }
 
   http.end();
 }
 
+
 void loop() {
   ArduinoOTA.handle();
   LEDlight();
+    Serial.println("updated");
 }
 
 void LEDlight() {
@@ -123,5 +141,5 @@ void LEDlight() {
   digitalWrite(ledPin, LOW);
 
   // Delay for 1000 milliseconds (1 second)
-  delay(1000);
+  delay(500);
 }

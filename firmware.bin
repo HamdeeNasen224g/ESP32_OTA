@@ -2,10 +2,13 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
+#include <HTTPClient.h>
+#include <Update.h>
 
 const char* ssid = "HAMDEE@TOT_2.4G";
 const char* password = "0989181002";
 const char* currentVersion = "v.0.2";
+const char* repoUrl = "https://github.com/HamdeeNasen224g/ESP32_OTA/raw/main/firmware.bin";
 
 void setup() {
   Serial.begin(115200);
@@ -19,6 +22,15 @@ void setup() {
     Serial.println("Connection Failed! Rebooting...");
     delay(5000);
     ESP.restart();
+  }
+
+  // Download firmware.bin
+  bool success = downloadFirmware();
+  if (success) {
+    Serial.println("Firmware download completed");
+    delay(1000); // Optional delay for stability
+  } else {
+    Serial.println("Firmware download failed");
   }
 
   // Initialize OTA
@@ -48,4 +60,26 @@ void setup() {
 
 void loop() {
   ArduinoOTA.handle();
+}
+
+bool downloadFirmware() {
+  WiFiClient client;
+  HTTPClient http;
+
+  Serial.print("Downloading firmware from: ");
+  Serial.println(repoUrl);
+
+  http.begin(client, repoUrl);
+  int httpCode = http.GET();
+  if (httpCode == HTTP_CODE_OK) {
+    Update.begin();
+    size_t written = Update.writeStream(http.getStream());
+    if (written == http.getSize()) {
+      if (Update.end(true)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
